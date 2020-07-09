@@ -1,0 +1,1 @@
+# proguard7-maven-sample
