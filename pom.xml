@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Note that this sample has been tested with OpenJDK 11. It should work on newer JRE versions, but necessary
+older ones due to the fact that the rt.jar is no longer there in JRE 11 due to the module system.
+
+Run the following in the terminal to test:
+
+mvn package
+
+Below you can also select an older version of the maven proguard plugin which does not work.
+It works when using my patch https://github.com/wvengen/proguard-maven-plugin/pull/111
+ -->
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>de.proguard7sample</groupId>
+	<artifactId>proguard7sample</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<proguard-version>7.0.0</proguard-version>
+		<obfuscate>true</obfuscate>
+	</properties>
+
+	<repositories>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-guardsquare-proguard</id>
+			<name>bintray</name>
+			<url>https://dl.bintray.com/guardsquare/proguard</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>bintray-guardsquare-proguard</id>
+			<name>bintray-plugins</name>
+			<url>https://dl.bintray.com/guardsquare/proguard</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+
+
+	<build>
+
+        <plugins>
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <!--
+                    <version>2.2.0</version>
+
+would lead to
+[INFO] - proguard-maven-plugin:2.2.0:proguard (default) @ proguard7sample -
+[INFO] execute ProGuard [-injars, '/home/miltenbe/proguard7-maven-sample/target/proguard7sample-1.0.0-SNAPSHOT_proguard_base.jar'(!META-INF/maven/**), -outjars, '/home/miltenbe/proguard7-maven-sample/target/proguard7sample-1.0.0-SNAPSHOT.jar', -include, '/home/miltenbe/proguard7-maven-sample/ObfuscationConfiguration.pro', -printmapping, '/home/miltenbe/proguard7-maven-sample/target/proguard_map.txt', -printseeds, '/home/miltenbe/proguard7-maven-sample/target/proguard_seed.txt', -applymapping, '/home/miltenbe/proguard7-maven-sample/Proguard-Mapping.txt']
+[INFO] proguard jar: /home/miltenbe/.m2/repository/com/guardsquare/proguard-base/7.0.0/proguard-base-7.0.0.jar
+ [proguard] Error: Unable to initialize main class proguard.ProGuard
+ [proguard] Caused by: java.lang.NoClassDefFoundError: proguard/classfile/attribute/visitor/AttributeVisitor
+
+ since the older version does not add the proguard-core.jar to the classpath, which is needed with Proguard 7
+                    -->
+                <version>2.2.1-SNAPSHOT</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.guardsquare</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>${proguard-version}</version>
+                        <scope>runtime</scope>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <proguardVersion>${proguard-version}</proguardVersion>
+                    <incremental>${obfuscate}</incremental>
+                    <obfuscate>${obfuscate}</obfuscate>
+                    <attachMap>${obfuscate}</attachMap>
+                    <includeDependency>true</includeDependency>
+					<applyMappingFile>${project.basedir}/Proguard-Mapping.txt</applyMappingFile>
+
+					<proguardInclude>${project.basedir}/ObfuscationConfiguration.pro</proguardInclude>
+					<injar>${project.build.finalName}.jar</injar>
+					<outputDirectory>${project.build.directory}</outputDirectory>
+                </configuration>
+
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>proguard</goal>
+						</goals>
+					</execution>
+				</executions>
+            </plugin>
+        </plugins>
+	</build>
+</project>
